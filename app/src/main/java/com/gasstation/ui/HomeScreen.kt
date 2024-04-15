@@ -12,6 +12,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import com.gasstation.ui.component.GasStationItem
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 fun HomeScreen() {
     Scaffold(topBar = { HomeHeader() }) {
         HomeHeader()
+        GasStationItem()
     }
 }
 
