@@ -5,7 +5,7 @@ import com.gasstation.domain.model.TransCoord
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface DaumService {
+interface KakaoService {
     @GET("/v2/local/geo/coord2address.json")
     suspend fun coord2address(
         @Query("x") x: Double,

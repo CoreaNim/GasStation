@@ -1,7 +1,9 @@
 package com.gasstation.di
 
 import com.gasstation.const.Const
-import com.gasstation.data.network.DaumService
+import com.gasstation.data.network.KakaoInterceptor
+import com.gasstation.data.network.KakaoService
+import com.gasstation.data.network.OpinetService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,18 +18,43 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 class NetworkModule {
+
     @Singleton
     @Provides
-    fun provideDaumService(
-        @Named("DAUM_URL") baseUrl: String,
-        okHttpClient: OkHttpClient
-    ): DaumService {
+    @Named("KAKAO_URL")
+    fun provideKakaoUrl() = Const.KAKAO_API_URL
+
+    @Singleton
+    @Provides
+    @Named("OPINET_URL")
+    fun provideOpinetUrl() = Const.OPINET_API_URL
+
+    @Singleton
+    @Provides
+    fun provideKakaoService(
+        @Named("KAKAO_URL") baseUrl: String,
+        @Named("KAKAO_OKHTTP") okHttpClient: OkHttpClient
+    ): KakaoService {
         return Retrofit.Builder()
             .client(okHttpClient)
             .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(DaumService::class.java)
+            .create(KakaoService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideOpinetService(
+        @Named("OPINET_URL") baseUrl: String,
+        okHttpClient: OkHttpClient
+    ): OpinetService {
+        return Retrofit.Builder()
+            .client(okHttpClient)
+            .baseUrl(baseUrl)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(OpinetService::class.java)
     }
 
     @Singleton
@@ -42,6 +69,14 @@ class NetworkModule {
 
     @Singleton
     @Provides
-    @Named("DAUM_URL")
-    fun provideDaumUrl() = Const.DAUM_API_URL
+    @Named("KAKAO_OKHTTP")
+    fun provideKakaoOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(KakaoInterceptor())
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            })
+            .build()
+    }
+
 }

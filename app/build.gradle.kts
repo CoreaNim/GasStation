@@ -26,13 +26,11 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
-            buildConfigField("String", "DAUM_API_KEY", "\"${rootProject.properties["daum.apikey"]}\"")
             buildConfigField("String", "OPINET_API_KEY", "\"${rootProject.properties["opinet.apikey"]}\"")
             buildConfigField("String", "KAKAO_API_KEY", "\"${rootProject.properties["kakao.apikey"]}\"")
         }
 
         release {
-            buildConfigField("String", "DAUM_API_KEY", "\"${rootProject.properties["daum.apikey"]}\"")
             buildConfigField("String", "OPINET_API_KEY", "\"${rootProject.properties["opinet.apikey"]}\"")
             buildConfigField("String", "KAKAO_API_KEY", "\"${rootProject.properties["kakao.apikey"]}\"")
             isMinifyEnabled = false

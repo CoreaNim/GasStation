@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,9 +37,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.gasstation.R
+import com.gasstation.domain.model.Coords
+import com.gasstation.domain.repository.HomeViewModel
 import com.gasstation.ui.navigation.NavTarget
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -55,6 +58,7 @@ import timber.log.Timber
 @Composable
 fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
     val scope = rememberCoroutineScope()
+    val homeViewModel = hiltViewModel<HomeViewModel>()
     var openRationaleDialog by remember { mutableStateOf(false) }
     val permissionStates = rememberMultiplePermissionsState(
         permissions = getRequirePermissions()
@@ -62,20 +66,12 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.Yellow)
     ) {
         HomeTopAppBar(navController = navController)
-
+        RequestPermission(scaffoldState)
         if (permissionStates.allPermissionsGranted) {
-            Card(shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-                    .shadow(20.dp)
-                    .shadow(elevation = 10.dp),
-                onClick = { }
-            ) {
-                Text("Card1")
-            }
+            Text("Card1")
         } else {
             Card(shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
@@ -93,7 +89,6 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
                         }
                     })
             }
-            RequestPermission(scaffoldState)
         }
     }
 
@@ -126,8 +121,10 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
     }
 }
 
+
 @Composable
 fun RequestPermission(scaffoldState: ScaffoldState) {
+    val homeViewModel = hiltViewModel<HomeViewModel>()
     val context = LocalContext.current
     val fusedLocationProviderClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
@@ -139,6 +136,14 @@ fun RequestPermission(scaffoldState: ScaffoldState) {
                 fusedLocationProviderClient = fusedLocationProviderClient,
                 onGetCurrentLocationSuccess = {
                     Timber.i("latitude = " + it.first + " , longitude = " + it.second)
+                    scope.launch {
+                        homeViewModel.getGasStationList(
+                            it.second,
+                            it.first,
+                            Coords.WGS84.name,
+                            Coords.KTM.name
+                        )
+                    }
                 },
                 onGetCurrentLocationFailed = {
                     popupSnackBar(scope, scaffoldState, "위치정보를 가지고 오지 못했습니다.")
@@ -157,7 +162,13 @@ fun RequestPermission(scaffoldState: ScaffoldState) {
 fun HomeTopAppBar(navController: NavHostController, modifier: Modifier = Modifier) {
     TopAppBar(
         title = { Text(stringResource(R.string.sort_distance)) },
-        colors = TopAppBarDefaults.mediumTopAppBarColors(Color.Yellow),
+        colors = TopAppBarColors(
+            containerColor = Color.Black,
+            titleContentColor = Color.Yellow,
+            actionIconContentColor = Color.Yellow,
+            navigationIconContentColor = Color.Black,
+            scrolledContainerColor = Color.Black
+        ),
         modifier = modifier,
         navigationIcon = {
         },

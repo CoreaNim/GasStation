@@ -34,7 +34,7 @@ data class Address(
     var region_3depth_name: String
 )
 
-data class Meta(var total_count: String)
+data class Meta(var total_count: Int)
 
 data class TransCoord(
     var documents: List<CoordDocument>?,
