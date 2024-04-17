@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -20,10 +21,9 @@ fun GasStationItem() {
             .shadow(elevation = 10.dp),
         onClick = { }
     ) {
-        ConstraintLayout(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-
-        }
+        Text("Card")
+        Text("Card")
+        Text("Card")
+        Text("Card")
     }
 }

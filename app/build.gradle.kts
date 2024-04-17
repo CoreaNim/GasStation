@@ -24,7 +24,17 @@ android {
     }
 
     buildTypes {
+        debug {
+            isDebuggable = true
+            buildConfigField("String", "DAUM_API_KEY", "\"${rootProject.properties["daum.apikey"]}\"")
+            buildConfigField("String", "OPINET_API_KEY", "\"${rootProject.properties["opinet.apikey"]}\"")
+            buildConfigField("String", "KAKAO_API_KEY", "\"${rootProject.properties["kakao.apikey"]}\"")
+        }
+
         release {
+            buildConfigField("String", "DAUM_API_KEY", "\"${rootProject.properties["daum.apikey"]}\"")
+            buildConfigField("String", "OPINET_API_KEY", "\"${rootProject.properties["opinet.apikey"]}\"")
+            buildConfigField("String", "KAKAO_API_KEY", "\"${rootProject.properties["kakao.apikey"]}\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -44,7 +54,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
         resources {
@@ -63,6 +73,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -77,6 +88,12 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
     implementation(libs.androidx.constraintlayout.compose)
+    implementation (libs.androidx.material)
     implementation(libs.timber)
-//    implementation("com.jakewharton.timber:timber:5.0.1")
+
+    implementation (libs.retrofit)
+    implementation (libs.logging.interceptor)
+    implementation (libs.converter.gson)
+    implementation (libs.androidx.navigation.compose)
+    implementation (libs.androidx.hilt.navigation.compose)
 }
