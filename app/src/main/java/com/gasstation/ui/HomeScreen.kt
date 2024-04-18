@@ -7,9 +7,13 @@ import android.content.pm.PackageManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.ScaffoldState
@@ -25,6 +29,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,9 +45,11 @@ import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.gasstation.R
+import com.gasstation.common.ResultWrapper
 import com.gasstation.domain.model.Coords
-import com.gasstation.domain.repository.HomeViewModel
+import com.gasstation.ui.component.GasStationItem
 import com.gasstation.ui.navigation.NavTarget
+import com.gasstation.viewmodel.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -63,6 +70,7 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
     val permissionStates = rememberMultiplePermissionsState(
         permissions = getRequirePermissions()
     )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -71,7 +79,41 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
         HomeTopAppBar(navController = navController)
         RequestPermission(scaffoldState)
         if (permissionStates.allPermissionsGranted) {
-            Text("Card1")
+            when (val response = homeViewModel.gasStationsResult.collectAsState().value) {
+                is ResultWrapper.Success -> {
+                    val scrollState = rememberLazyListState()
+                    val gasStations = response.value.RESULT.OIL
+                    LazyColumn(
+                        state = scrollState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                        contentPadding = PaddingValues(10.dp)
+                    ) {
+                        items(gasStations) { item ->
+                            GasStationItem(gasStations = item)
+                        }
+                    }
+                }
+
+                is ResultWrapper.AppServerError -> {
+
+                }
+
+                is ResultWrapper.GenericError -> {
+
+                }
+
+                ResultWrapper.Loading -> {
+
+                }
+
+                ResultWrapper.NetworkError -> {}
+                ResultWrapper.Start -> {
+
+                }
+            }
+
         } else {
             Card(shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
