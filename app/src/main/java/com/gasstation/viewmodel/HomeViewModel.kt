@@ -1,8 +1,10 @@
 package com.gasstation.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.gasstation.common.ResultWrapper
-import com.gasstation.domain.model.OPINET
+import com.gasstation.domain.model.RESULT
+import com.gasstation.domain.model.SortType
 import com.gasstation.domain.repository.GasStationRepository
 import com.gasstation.domain.repository.SharePrefsRepository
 import com.gasstation.extensions.resultCallbackFlow
@@ -17,10 +19,26 @@ class HomeViewModel @Inject constructor(
     private val sharePrefsRepo: SharePrefsRepository
 ) : ViewModel() {
     val currentAddress = MutableStateFlow<ResultWrapper<String>>(ResultWrapper.Start)
-    val gasStationsResult = MutableStateFlow<ResultWrapper<OPINET>>(ResultWrapper.Start)
+    val gasStationsResult = MutableStateFlow<ResultWrapper<RESULT>>(ResultWrapper.Start)
+    private val sortType = mutableStateOf(sharePrefsRepo.sortType)
     fun getCurrentAddress() = currentAddress.value
 
-    fun getSortyType() = sharePrefsRepo.sortType
+    fun getSortType() = sortType.value
+
+    fun changeSortType() {
+        val gasStations = gasStationsResult.value.takeValueOrThrow().OIL
+        if (SortType.DISTANCE.sortType == getSortType()) {
+            sharePrefsRepo.sortType = SortType.PRICE.sortType
+            sortType.value = SortType.PRICE.sortType
+            gasStationsResult.value.takeValueOrThrow().OIL =
+                gasStations.sortedBy { it.PRICE }
+        } else {
+            sharePrefsRepo.sortType = SortType.DISTANCE.sortType
+            sortType.value = SortType.DISTANCE.sortType
+            gasStationsResult.value.takeValueOrThrow().OIL =
+                gasStations.sortedBy { it.DISTANCE }
+        }
+    }
 
     fun getCurrentAddress(x: Double, y: Double, inputCoord: String) =
         resultCallbackFlow(currentAddress) {
@@ -39,7 +57,7 @@ class HomeViewModel @Inject constructor(
                 sharePrefsRepo.oilType
             ).apply {
                 if (this is ResultWrapper.Success) {
-                    Timber.i("list size = " + takeValueOrThrow().RESULT.OIL.size)
+                    Timber.i("list size = " + takeValueOrThrow().OIL.size)
                 }
             }
         }

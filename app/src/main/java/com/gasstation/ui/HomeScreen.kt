@@ -77,17 +77,17 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
             .fillMaxSize()
             .background(Color.Yellow)
     ) {
-        HomeTopAppBar(navController = navController, sortType = homeViewModel.getSortyType())
+        HomeTopAppBar(navController = navController, sortType = homeViewModel.getSortType())
         RequestPermission(scaffoldState)
         if (permissionStates.allPermissionsGranted) {
             val currentAddress by homeViewModel.currentAddress.collectAsState()
             if (currentAddress is ResultWrapper.Success) {
-                CurrentAddresssText(address = homeViewModel.getCurrentAddress().takeValueOrThrow())
+                CurrentAddresssText(address = currentAddress.takeValueOrThrow())
             }
             when (val response = homeViewModel.gasStationsResult.collectAsState().value) {
                 is ResultWrapper.Success -> {
                     val scrollState = rememberLazyListState()
-                    val gasStations = response.value.RESULT.OIL
+                    val gasStations = response.value.OIL
                     LazyColumn(
                         state = scrollState,
                         modifier = Modifier
@@ -200,8 +200,13 @@ fun HomeTopAppBar(
     sortType: String,
     modifier: Modifier = Modifier
 ) {
+    val homeViewModel = hiltViewModel<HomeViewModel>()
     TopAppBar(
-        title = { Text(sortType) },
+        title = {
+            Text(text = sortType, modifier = Modifier.clickable {
+                homeViewModel.changeSortType()
+            })
+        },
         colors = TopAppBarColors(
             containerColor = Color.Black,
             titleContentColor = Color.Yellow,

@@ -35,7 +35,7 @@ class GasStationRepository @Inject constructor(
         distanceType: String,
         sortType: String,
         oilType: String
-    ): ResultWrapper<OPINET> {
+    ): ResultWrapper<RESULT> {
         return safeApiCall {
             val transCoord = kakaoService.tanscoord(x, y, inputCoord, outputCoord)
             var result = OPINET(RESULT(emptyList()))
@@ -51,7 +51,7 @@ class GasStationRepository @Inject constructor(
                     "json"
                 )
             }
-            result
+            result.RESULT
         }
     }
 }
