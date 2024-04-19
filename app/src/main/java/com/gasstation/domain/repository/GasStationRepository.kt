@@ -16,22 +16,14 @@ class GasStationRepository @Inject constructor(
     private val kakaoService: KakaoService,
     private val opinetService: OpinetService
 ) {
-
-    suspend fun getGasStationLists(x: Double, y: Double, inputCoord: String, outputCoord: String) {
-        val coord2address = kakaoService.coord2address(x, y, inputCoord)
-        val transCoord = kakaoService.tanscoord(x, y, inputCoord, outputCoord)
-
-        val documents = transCoord.documents?.first()
-        if (documents?.x != null && documents?.y != null) {
-            val opinet = opinetService.findAllGasStation(
-                Const.OPINET_API_KEY,
-                documents.x,
-                documents.y,
-                DistanceType.getDistance(DistanceType.D5.distance),
-                SortType.getSort(SortType.DISTANCE.sortType),
-                OilType.getOilType(OilType.B027.oil),
-                "json"
-            )
+    suspend fun getCurrentAddress(
+        x: Double,
+        y: Double,
+        inputCoord: String
+    ): ResultWrapper<String> {
+        return safeApiCall {
+            val coord2address = kakaoService.coord2address(x, y, inputCoord)
+            coord2address.documents?.first()?.address?.address_name ?: ""
         }
     }
 
@@ -42,7 +34,6 @@ class GasStationRepository @Inject constructor(
         outputCoord: String
     ): ResultWrapper<OPINET> {
         return safeApiCall {
-            val coord2address = kakaoService.coord2address(x, y, inputCoord)
             val transCoord = kakaoService.tanscoord(x, y, inputCoord, outputCoord)
             var result = OPINET(RESULT(emptyList()))
             val documents = transCoord.documents?.first()

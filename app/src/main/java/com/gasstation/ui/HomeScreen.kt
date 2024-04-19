@@ -47,6 +47,7 @@ import androidx.navigation.NavHostController
 import com.gasstation.R
 import com.gasstation.common.ResultWrapper
 import com.gasstation.domain.model.Coords
+import com.gasstation.ui.component.CurrentAddresssText
 import com.gasstation.ui.component.GasStationItem
 import com.gasstation.ui.navigation.NavTarget
 import com.gasstation.viewmodel.HomeViewModel
@@ -79,6 +80,10 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
         HomeTopAppBar(navController = navController)
         RequestPermission(scaffoldState)
         if (permissionStates.allPermissionsGranted) {
+            val currentAddress by homeViewModel.currentAddress.collectAsState()
+            if (currentAddress is ResultWrapper.Success) {
+                CurrentAddresssText(address = homeViewModel.getCurrentAddress().takeValueOrThrow())
+            }
             when (val response = homeViewModel.gasStationsResult.collectAsState().value) {
                 is ResultWrapper.Success -> {
                     val scrollState = rememberLazyListState()
@@ -96,22 +101,10 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
                     }
                 }
 
-                is ResultWrapper.AppServerError -> {
+                else -> {
 
                 }
 
-                is ResultWrapper.GenericError -> {
-
-                }
-
-                ResultWrapper.Loading -> {
-
-                }
-
-                ResultWrapper.NetworkError -> {}
-                ResultWrapper.Start -> {
-
-                }
             }
 
         } else {
@@ -179,6 +172,7 @@ fun RequestPermission(scaffoldState: ScaffoldState) {
                 onGetCurrentLocationSuccess = {
                     Timber.i("latitude = " + it.first + " , longitude = " + it.second)
                     scope.launch {
+                        homeViewModel.getCurrentAddress(it.second, it.first, Coords.WGS84.name)
                         homeViewModel.getGasStationList(
                             it.second,
                             it.first,

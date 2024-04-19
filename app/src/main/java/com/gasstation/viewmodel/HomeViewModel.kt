@@ -14,7 +14,14 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val gasStationRepository: GasStationRepository
 ) : ViewModel() {
+    val currentAddress = MutableStateFlow<ResultWrapper<String>>(ResultWrapper.Start)
     val gasStationsResult = MutableStateFlow<ResultWrapper<OPINET>>(ResultWrapper.Start)
+    fun getCurrentAddress() = currentAddress.value
+
+    fun getCurrentAddress(x: Double, y: Double, inputCoord: String) =
+        resultCallbackFlow(currentAddress) {
+            gasStationRepository.getCurrentAddress(x, y, inputCoord)
+        }
     fun getGasStationList(x: Double, y: Double, inputCoord: String, outputCoord: String) =
         resultCallbackFlow(gasStationsResult) {
             gasStationRepository.getGasStationList(x, y, inputCoord, outputCoord).apply {
