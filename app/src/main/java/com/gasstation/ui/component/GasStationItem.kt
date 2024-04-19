@@ -18,10 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gasstation.R
 import com.gasstation.domain.model.GasStation
+import com.gasstation.domain.model.GasStationType
+import com.gasstation.extensions.distanceFormat
+import com.gasstation.extensions.numberFormat
 
 @Composable
 fun GasStationItem(gasStations: GasStation) {
@@ -42,8 +46,8 @@ fun GasStationItem(gasStations: GasStation) {
         ) {
             Image(
                 modifier = Modifier
-                    .size(40.dp),
-                painter = painterResource(id = R.drawable.ic_gsc),
+                    .size(45.dp),
+                painter = painterResource(id = GasStationType.getGasStationImg(gasStations.POLL_DIV_CD)),
                 contentDescription = "",
                 contentScale = ContentScale.Fit
             )
@@ -54,29 +58,40 @@ fun GasStationItem(gasStations: GasStation) {
                         modifier = Modifier.background(Color.Gray)
                     ) {
                         Text(
-                            text = gasStations.POLL_DIV_CD,
+                            text = "휘발유",
                             style = typography.labelMedium,
                             color = Color.Black
                         )
                     }
                     Text(
+                        modifier = Modifier.padding(start = 5.dp),
                         text = gasStations.OS_NM,
                         style = typography.labelMedium,
                         color = Color.Gray
                     )
                 }
                 Row() {
-                    Text(
-                        text = gasStations.PRICE.toString() + "원",
-                        style = typography.labelLarge,
-                        color = Color.Black
-                    )
-
-                    Text(
-                        text = gasStations.DISTANCE.toString() + "km",
-                        style = typography.labelLarge,
-                        color = Color.Black
-                    )
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text(
+                            text = gasStations.PRICE.toString().numberFormat(),
+                            style = typography.labelLarge,
+                            color = Color.Black
+                        )
+                        Text(
+                            text = stringResource(id = R.string.won)
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text(
+                            modifier = Modifier.padding(start = 5.dp),
+                            text = gasStations.DISTANCE.distanceFormat(),
+                            style = typography.labelLarge,
+                            color = Color.Black
+                        )
+                        Text(
+                            text = stringResource(id = R.string.km)
+                        )
+                    }
                 }
             }
         }

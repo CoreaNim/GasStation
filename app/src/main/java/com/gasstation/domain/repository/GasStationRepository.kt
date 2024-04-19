@@ -31,7 +31,10 @@ class GasStationRepository @Inject constructor(
         x: Double,
         y: Double,
         inputCoord: String,
-        outputCoord: String
+        outputCoord: String,
+        distanceType: String,
+        sortType: String,
+        oilType: String
     ): ResultWrapper<OPINET> {
         return safeApiCall {
             val transCoord = kakaoService.tanscoord(x, y, inputCoord, outputCoord)
@@ -42,9 +45,9 @@ class GasStationRepository @Inject constructor(
                     Const.OPINET_API_KEY,
                     documents.x,
                     documents.y,
-                    DistanceType.getDistance(DistanceType.D5.distance),
-                    SortType.getSort(SortType.DISTANCE.sortType),
-                    OilType.getOilType(OilType.B027.oil),
+                    DistanceType.getDistance(distanceType),
+                    SortType.getSort(sortType),
+                    OilType.getOilType(oilType),
                     "json"
                 )
             }

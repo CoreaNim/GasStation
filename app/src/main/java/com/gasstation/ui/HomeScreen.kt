@@ -77,7 +77,7 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
             .fillMaxSize()
             .background(Color.Yellow)
     ) {
-        HomeTopAppBar(navController = navController)
+        HomeTopAppBar(navController = navController, sortType = homeViewModel.getSortyType())
         RequestPermission(scaffoldState)
         if (permissionStates.allPermissionsGranted) {
             val currentAddress by homeViewModel.currentAddress.collectAsState()
@@ -195,9 +195,13 @@ fun RequestPermission(scaffoldState: ScaffoldState) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeTopAppBar(navController: NavHostController, modifier: Modifier = Modifier) {
+fun HomeTopAppBar(
+    navController: NavHostController,
+    sortType: String,
+    modifier: Modifier = Modifier
+) {
     TopAppBar(
-        title = { Text(stringResource(R.string.sort_distance)) },
+        title = { Text(sortType) },
         colors = TopAppBarColors(
             containerColor = Color.Black,
             titleContentColor = Color.Yellow,
