@@ -14,21 +14,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.gasstation.ui.navigation.NavKey
 import com.gasstation.ui.navigation.NavTarget
-import com.gasstation.viewmodel.HomeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen() {
-    val homeViewModel = hiltViewModel<HomeViewModel>()
     val scaffoldState = rememberScaffoldState()
     val navController = rememberNavController()
 
@@ -64,9 +64,22 @@ fun NavigationScreen(
                 HomeScreen(scaffoldState, navController)
             }
             composable(
-                route = NavTarget.Settings.route
+                route = NavTarget.Setting.route
             ) {
                 SettingScreen(scaffoldState, navController)
+            }
+            composable(
+                route = NavTarget.SettingDetail.route, arguments = listOf(
+                    navArgument(NavKey.SETTING_TYPE) {
+                        type = NavType.StringType
+                    }
+                )
+            ) {
+                SettingDetailScreen(
+                    it.arguments?.getString(NavKey.SETTING_TYPE).orEmpty(),
+                    scaffoldState,
+                    navController
+                )
             }
         }
     }

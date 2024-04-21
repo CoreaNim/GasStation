@@ -5,7 +5,7 @@ import com.gasstation.const.Const
 import com.gasstation.data.network.KakaoService
 import com.gasstation.data.network.OpinetService
 import com.gasstation.domain.model.DistanceType
-import com.gasstation.domain.model.OPINET
+import com.gasstation.domain.model.GasStationType
 import com.gasstation.domain.model.OilType
 import com.gasstation.domain.model.RESULT
 import com.gasstation.domain.model.SortType
@@ -34,14 +34,14 @@ class GasStationRepository @Inject constructor(
         outputCoord: String,
         distanceType: String,
         sortType: String,
-        oilType: String
+        oilType: String,
+        gasStationType: String,
     ): ResultWrapper<RESULT> {
         return safeApiCall {
             val transCoord = kakaoService.tanscoord(x, y, inputCoord, outputCoord)
-            var result = OPINET(RESULT(emptyList()))
             val documents = transCoord.documents?.first()
-            if (documents?.x != null && documents?.y != null) {
-                result = opinetService.findAllGasStation(
+            if (documents?.x != null && documents.y != null) {
+                val result = opinetService.findAllGasStation(
                     Const.OPINET_API_KEY,
                     documents.x,
                     documents.y,
@@ -49,9 +49,20 @@ class GasStationRepository @Inject constructor(
                     SortType.getSort(sortType),
                     OilType.getOilType(oilType),
                     "json"
-                )
+                ).apply {
+                    this.RESULT.OIL = this.RESULT.OIL.filter {
+                        GasStationType.ALL.name == GasStationType.getGasStation(
+                            gasStationType
+                        ) ||
+                                it.POLL_DIV_CD == GasStationType.getGasStation(
+                            gasStationType
+                        )
+                    }
+                }
+                return@safeApiCall result.RESULT
+            } else {
+                return@safeApiCall RESULT(emptyList())
             }
-            result.RESULT
         }
     }
 }

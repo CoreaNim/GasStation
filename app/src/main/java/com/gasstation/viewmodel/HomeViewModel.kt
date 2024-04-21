@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.gasstation.common.ResultWrapper
 import com.gasstation.domain.model.RESULT
+import com.gasstation.domain.model.SettingType
 import com.gasstation.domain.model.SortType
 import com.gasstation.domain.repository.GasStationRepository
 import com.gasstation.domain.repository.SharePrefsRepository
@@ -21,9 +22,12 @@ class HomeViewModel @Inject constructor(
     val currentAddress = MutableStateFlow<ResultWrapper<String>>(ResultWrapper.Start)
     val gasStationsResult = MutableStateFlow<ResultWrapper<RESULT>>(ResultWrapper.Start)
     private val sortType = mutableStateOf(sharePrefsRepo.sortType)
+    private val oilType = mutableStateOf(sharePrefsRepo.oilType)
     fun getCurrentAddress() = currentAddress.value
 
     fun getSortType() = sortType.value
+
+    fun getOilType() = oilType.value
 
     fun changeSortType() {
         val gasStations = gasStationsResult.value.takeValueOrThrow().OIL
@@ -54,11 +58,19 @@ class HomeViewModel @Inject constructor(
                 outputCoord,
                 sharePrefsRepo.distanceType,
                 sharePrefsRepo.sortType,
-                sharePrefsRepo.oilType
+                sharePrefsRepo.oilType,
+                sharePrefsRepo.gasStationType
             ).apply {
                 if (this is ResultWrapper.Success) {
+                    sortType.value = sharePrefsRepo.sortType
+                    oilType.value = sharePrefsRepo.oilType
                     Timber.i("list size = " + takeValueOrThrow().OIL.size)
                 }
             }
         }
+
+    fun saveSetting(settingType: SettingType, type: String) {
+        sharePrefsRepo.saveSetting(settingType, type)
+    }
+
 }

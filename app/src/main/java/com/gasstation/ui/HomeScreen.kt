@@ -77,7 +77,10 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
             .fillMaxSize()
             .background(Color.Yellow)
     ) {
-        HomeTopAppBar(navController = navController, sortType = homeViewModel.getSortType())
+        HomeTopAppBar(
+            navController = navController,
+            sortType = homeViewModel.getSortType(),
+            onChangeSortType = { homeViewModel.changeSortType() })
         RequestPermission(scaffoldState)
         if (permissionStates.allPermissionsGranted) {
             val currentAddress by homeViewModel.currentAddress.collectAsState()
@@ -92,11 +95,12 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
                         state = scrollState,
                         modifier = Modifier
                             .fillMaxSize()
-                            .weight(1f),
+                            .weight(1F),
                         contentPadding = PaddingValues(10.dp)
                     ) {
+                        Timber.i("homeScreen() homeViewModel.getOilType() = " + homeViewModel.getOilType())
                         items(gasStations) { item ->
-                            GasStationItem(gasStations = item)
+                            GasStationItem(gasStations = item, homeViewModel.getOilType())
                         }
                     }
                 }
@@ -198,13 +202,13 @@ fun RequestPermission(scaffoldState: ScaffoldState) {
 fun HomeTopAppBar(
     navController: NavHostController,
     sortType: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onChangeSortType: () -> Unit
 ) {
-    val homeViewModel = hiltViewModel<HomeViewModel>()
     TopAppBar(
         title = {
             Text(text = sortType, modifier = Modifier.clickable {
-                homeViewModel.changeSortType()
+                onChangeSortType()
             })
         },
         colors = TopAppBarColors(
@@ -219,9 +223,9 @@ fun HomeTopAppBar(
         },
         actions = {
             IconButton(onClick = {
-                navController.navigate(NavTarget.Settings.route)
+                navController.navigate(NavTarget.Setting.route)
             }) {
-                Icon(Icons.Filled.Settings, "Settings")
+                Icon(Icons.Filled.Settings, "Setting")
             }
         }
     )

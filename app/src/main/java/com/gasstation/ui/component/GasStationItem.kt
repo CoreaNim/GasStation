@@ -24,11 +24,12 @@ import androidx.compose.ui.unit.dp
 import com.gasstation.R
 import com.gasstation.domain.model.GasStation
 import com.gasstation.domain.model.GasStationType
+import com.gasstation.domain.model.OilType
 import com.gasstation.extensions.distanceFormat
 import com.gasstation.extensions.numberFormat
 
 @Composable
-fun GasStationItem(gasStations: GasStation) {
+fun GasStationItem(gasStations: GasStation, oilType: String) {
     Card(shape = RoundedCornerShape(4.dp),
         modifier = Modifier
             .fillMaxWidth()
@@ -58,7 +59,7 @@ fun GasStationItem(gasStations: GasStation) {
                         modifier = Modifier.background(Color.Gray)
                     ) {
                         Text(
-                            text = "휘발유",
+                            text = oilType,
                             style = typography.labelMedium,
                             color = Color.Black
                         )
@@ -109,7 +110,7 @@ private fun PreviewGasStationItem() {
             GIS_X_COOR = "302896.03050",
             GIS_Y_COOR = "545023.68630",
             OS_NM = "영등포제일셀프주유소",
-            UNI_ID = "A0000427"
-        )
+            UNI_ID = "A0000427",
+        ), OilType.B027.oil
     )
 }
