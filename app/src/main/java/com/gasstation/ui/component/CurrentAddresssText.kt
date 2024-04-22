@@ -16,7 +16,7 @@ fun CurrentAddresssText(address: String) {
     Text(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(top = 12.dp),
         text = address,
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.titleMedium,

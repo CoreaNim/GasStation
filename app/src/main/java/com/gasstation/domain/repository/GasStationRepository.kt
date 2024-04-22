@@ -4,11 +4,13 @@ import com.gasstation.common.ResultWrapper
 import com.gasstation.const.Const
 import com.gasstation.data.network.KakaoService
 import com.gasstation.data.network.OpinetService
+import com.gasstation.domain.model.CoordDocument
 import com.gasstation.domain.model.DistanceType
 import com.gasstation.domain.model.GasStationType
 import com.gasstation.domain.model.OilType
 import com.gasstation.domain.model.RESULT
 import com.gasstation.domain.model.SortType
+import com.gasstation.domain.model.TransCoord
 import com.gasstation.extensions.safeApiCall
 import javax.inject.Inject
 
@@ -16,6 +18,7 @@ class GasStationRepository @Inject constructor(
     private val kakaoService: KakaoService,
     private val opinetService: OpinetService
 ) {
+
     suspend fun getCurrentAddress(
         x: Double,
         y: Double,
@@ -25,6 +28,15 @@ class GasStationRepository @Inject constructor(
             val coord2address = kakaoService.coord2address(x, y, inputCoord)
             coord2address.documents?.first()?.address?.address_name ?: ""
         }
+    }
+
+    suspend fun transCoord(
+        x: Double,
+        y: Double,
+        inputCoord: String,
+        outputCoord: String
+    ): CoordDocument? {
+        return kakaoService.tanscoord(x, y, inputCoord, outputCoord).documents?.firstOrNull()
     }
 
     suspend fun getGasStationList(

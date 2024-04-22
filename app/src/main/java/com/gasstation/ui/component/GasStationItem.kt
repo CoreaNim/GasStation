@@ -32,7 +32,11 @@ import com.gasstation.ui.theme.ColorGray
 import com.gasstation.ui.theme.ColorWhite
 
 @Composable
-fun GasStationItem(gasStations: GasStation, oilType: String) {
+fun GasStationItem(
+    gasStations: GasStation,
+    oilType: String,
+    onGasStationItemClick: () -> Unit
+) {
     Card(shape = RoundedCornerShape(4.dp),
         colors = CardColors(
             contentColor = ColorWhite,
@@ -44,7 +48,7 @@ fun GasStationItem(gasStations: GasStation, oilType: String) {
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(8.dp),
-        onClick = { }
+        onClick = { onGasStationItemClick() }
     ) {
         Row(
             modifier = Modifier
@@ -139,5 +143,6 @@ private fun PreviewGasStationItem() {
             OS_NM = "영등포제일셀프주유소",
             UNI_ID = "A0000427",
         ), OilType.B027.oil
-    )
+    ) {
+    }
 }

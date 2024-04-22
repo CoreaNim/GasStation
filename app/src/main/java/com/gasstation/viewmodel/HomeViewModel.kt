@@ -3,6 +3,7 @@ package com.gasstation.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.gasstation.common.ResultWrapper
+import com.gasstation.domain.model.Coords
 import com.gasstation.domain.model.RESULT
 import com.gasstation.domain.model.SettingType
 import com.gasstation.domain.model.SortType
@@ -23,11 +24,11 @@ class HomeViewModel @Inject constructor(
     val gasStationsResult = MutableStateFlow<ResultWrapper<RESULT>>(ResultWrapper.Start)
     private val sortType = mutableStateOf(sharePrefsRepo.sortType)
     private val oilType = mutableStateOf(sharePrefsRepo.oilType)
-    fun getCurrentAddress() = currentAddress.value
-
     fun getSortType() = sortType.value
 
     fun getOilType() = oilType.value
+
+    fun getMapType() = sharePrefsRepo.mapType
 
     fun changeSortType() {
         val gasStations = gasStationsResult.value.takeValueOrThrow().OIL
@@ -94,6 +95,13 @@ class HomeViewModel @Inject constructor(
             SettingType.MAP_TYPE -> {
                 sharePrefsRepo.mapType
             }
+        }
+    }
+
+    suspend fun landingMap(x: Double, y: Double, openMap: (String, String) -> Unit) {
+        val result = gasStationRepository.transCoord(x, y, Coords.KTM.name, Coords.WGS84.name)
+        if (result != null) {
+            openMap(result.x.toString(), result.y.toString())
         }
     }
 

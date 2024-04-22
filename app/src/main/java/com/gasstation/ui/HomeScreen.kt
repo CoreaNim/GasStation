@@ -3,7 +3,9 @@ package com.gasstation.ui
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -37,7 +39,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -46,7 +47,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.gasstation.R
 import com.gasstation.common.ResultWrapper
+import com.gasstation.const.Const
 import com.gasstation.domain.model.Coords
+import com.gasstation.domain.model.MapType
 import com.gasstation.ui.component.CurrentAddresssText
 import com.gasstation.ui.component.GasStationItem
 import com.gasstation.ui.navigation.NavTarget
@@ -68,6 +71,8 @@ import timber.log.Timber
 @Composable
 fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val coroutine = rememberCoroutineScope()
     val homeViewModel = hiltViewModel<HomeViewModel>()
     var openRationaleDialog by remember { mutableStateOf(false) }
     val permissionStates = rememberMultiplePermissionsState(
@@ -98,11 +103,28 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
                         modifier = Modifier
                             .fillMaxSize()
                             .weight(1F),
-                        contentPadding = PaddingValues(10.dp)
+                        contentPadding = PaddingValues(8.dp)
                     ) {
-                        Timber.i("homeScreen() homeViewModel.getOilType() = " + homeViewModel.getOilType())
                         items(gasStations) { item ->
-                            GasStationItem(gasStations = item, homeViewModel.getOilType())
+                            GasStationItem(gasStations = item, homeViewModel.getOilType()) {
+                                val mapType = MapType.getMap(homeViewModel.getMapType())
+                                val isAppInstalled = isAppInstalled(context, mapType)
+                                if (isAppInstalled) {
+                                    coroutine.launch {
+                                        homeViewModel.landingMap(
+                                            item.GIS_X_COOR.toDouble(),
+                                            item.GIS_Y_COOR.toDouble()
+                                        ) { x, y ->
+                                            val url = getMapUrl(x, y, mapType, item.OS_NM)
+                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+                                            context.startActivity(intent)
+                                        }
+                                    }
+                                } else {
+                                    landingMapMarket(context, mapType)
+                                }
+                            }
                         }
                     }
                 }
@@ -309,4 +331,55 @@ fun getRequirePermissions(): List<String> {
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_FINE_LOCATION
     )
+}
+
+private fun isAppInstalled(context: Context, mapType: MapType): Boolean {
+    val packageName = getPackageName(mapType)
+    return try {
+        context.packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES)
+        true
+    } catch (e: PackageManager.NameNotFoundException) {
+        false
+    }
+}
+
+private fun landingMapMarket(context: Context, mapType: MapType) {
+    context.startActivity(
+        Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("market://details?id=${getPackageName(mapType)}")
+        )
+    )
+}
+
+private fun getPackageName(mapType: MapType): String {
+    return when (mapType) {
+        MapType.TMAP -> {
+            Const.T_MAP_MARKET_URL
+        }
+
+        MapType.KAKAO -> {
+            Const.KAKAO_MAP_MARKET_URL
+        }
+
+        MapType.NAVER -> {
+            Const.NAVER_MAP_MARKET_URL
+        }
+    }
+}
+
+private fun getMapUrl(x: String, y: String, mapType: MapType, name: String): String {
+    return when (mapType) {
+        MapType.TMAP -> {
+            "tmap://route?goalx=${x}&goaly=${y}&reqCoordType=KTM&resCoordType=WGS84"
+        }
+
+        MapType.KAKAO -> {
+            "kakaomap://route?ep=${y},${x}&by=CAR"
+        }
+
+        MapType.NAVER -> {
+            "nmap://route/car?dlat=${y}&dlng=${x}&dname=${name}"
+        }
+    }
 }
