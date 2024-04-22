@@ -1,14 +1,10 @@
 package com.gasstation.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Divider
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -23,9 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.gasstation.R
+import com.gasstation.ui.component.SettingItem
+import com.gasstation.ui.theme.ColorBlack
+import com.gasstation.ui.theme.ColorGray
+import com.gasstation.ui.theme.ColorGray4
+import com.gasstation.ui.theme.ColorYellow
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,15 +35,15 @@ fun SettingScreen(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.background(Color.Gray)) {
+    Column(modifier = Modifier.background(ColorGray)) {
         TopAppBar(
             title = { },
             colors = TopAppBarColors(
-                containerColor = Color.Black,
-                titleContentColor = Color.Yellow,
-                actionIconContentColor = Color.Yellow,
-                navigationIconContentColor = Color.Black,
-                scrolledContainerColor = Color.Black
+                containerColor = ColorBlack,
+                titleContentColor = ColorYellow,
+                actionIconContentColor = ColorYellow,
+                navigationIconContentColor = ColorBlack,
+                scrolledContainerColor = ColorBlack
             ),
             modifier = modifier,
             navigationIcon = {
@@ -64,19 +64,12 @@ fun SettingScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1F)
-                .background(Color.White)
+                .background(ColorGray4)
         ) {
-            items(menu) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp)
-                ) {
-                    Text(text = it, modifier = Modifier.clickable {
-                        navController.navigate("home/setting/detail/${it}")
-                    })
+            items(menu) { setting ->
+                SettingItem(setting = setting) {
+                    navController.navigate("home/setting/detail/${setting}")
                 }
-                Divider(modifier = Modifier, color = Color.Gray, thickness = 0.5.dp)
             }
         }
     }

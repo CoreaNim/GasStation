@@ -1,14 +1,10 @@
 package com.gasstation.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Divider
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -16,14 +12,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.gasstation.R
@@ -33,6 +27,11 @@ import com.gasstation.domain.model.MapType
 import com.gasstation.domain.model.OilType
 import com.gasstation.domain.model.SettingType
 import com.gasstation.domain.model.SortType
+import com.gasstation.ui.component.SettingDetailItem
+import com.gasstation.ui.theme.ColorBlack
+import com.gasstation.ui.theme.ColorGray
+import com.gasstation.ui.theme.ColorGray4
+import com.gasstation.ui.theme.ColorYellow
 import com.gasstation.viewmodel.HomeViewModel
 
 
@@ -46,24 +45,24 @@ fun SettingDetailScreen(
 ) {
     val homeViewModel = hiltViewModel<HomeViewModel>()
 
-    Column(modifier = Modifier.background(Color.Gray)) {
+    Column(modifier = Modifier.background(ColorGray)) {
         TopAppBar(
             title = { },
             colors = TopAppBarColors(
-                containerColor = Color.Black,
-                titleContentColor = Color.Yellow,
-                actionIconContentColor = Color.Yellow,
-                navigationIconContentColor = Color.Black,
-                scrolledContainerColor = Color.Black
+                containerColor = ColorBlack,
+                titleContentColor = ColorYellow,
+                actionIconContentColor = ColorYellow,
+                navigationIconContentColor = ColorBlack,
+                scrolledContainerColor = ColorBlack
             ),
             modifier = modifier,
             navigationIcon = {
                 IconButton(
                     colors = IconButtonColors(
-                        contentColor = Color.Yellow,
-                        containerColor = Color.Black,
-                        disabledContainerColor = Color.Gray,
-                        disabledContentColor = Color.Gray
+                        contentColor = ColorYellow,
+                        containerColor = ColorBlack,
+                        disabledContainerColor = ColorGray,
+                        disabledContentColor = ColorGray
                     ), onClick = {
                         navController.popBackStack()
                     }) {
@@ -100,25 +99,18 @@ fun SettingDetailScreen(
                 settingType = SettingType.MAP_TYPE
             }
         }
-
+        val currentSettingType = homeViewModel.getCurrentSettingType(settingType)
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1F)
-                .background(Color.White)
+                .background(ColorGray4)
         ) {
             items(details) { type ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp)
-                ) {
-                    Text(text = type, modifier = Modifier.clickable {
-                        homeViewModel.saveSetting(settingType, type)
-                        navController.popBackStack()
-                    })
+                SettingDetailItem(type, currentSettingType == type) {
+                    homeViewModel.saveSetting(settingType, type)
+                    navController.popBackStack()
                 }
-                Divider(modifier = Modifier, color = Color.Gray, thickness = 0.5.dp)
             }
         }
     }

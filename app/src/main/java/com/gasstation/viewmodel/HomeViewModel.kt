@@ -73,4 +73,28 @@ class HomeViewModel @Inject constructor(
         sharePrefsRepo.saveSetting(settingType, type)
     }
 
+    fun getCurrentSettingType(settingType: SettingType): String {
+        return when (settingType) {
+            SettingType.DISTANCE_TYPE -> {
+                sharePrefsRepo.distanceType
+            }
+
+            SettingType.OIL_TYPE -> {
+                sharePrefsRepo.oilType
+            }
+
+            SettingType.GAS_STATION_TYPE -> {
+                sharePrefsRepo.gasStationType
+            }
+
+            SettingType.SORT_TYPE -> {
+                sharePrefsRepo.sortType
+            }
+
+            SettingType.MAP_TYPE -> {
+                sharePrefsRepo.mapType
+            }
+        }
+    }
+
 }

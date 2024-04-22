@@ -50,6 +50,8 @@ import com.gasstation.domain.model.Coords
 import com.gasstation.ui.component.CurrentAddresssText
 import com.gasstation.ui.component.GasStationItem
 import com.gasstation.ui.navigation.NavTarget
+import com.gasstation.ui.theme.ColorBlack
+import com.gasstation.ui.theme.ColorYellow
 import com.gasstation.viewmodel.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -75,7 +77,7 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Yellow)
+            .background(ColorYellow)
     ) {
         HomeTopAppBar(
             navController = navController,
@@ -212,11 +214,11 @@ fun HomeTopAppBar(
             })
         },
         colors = TopAppBarColors(
-            containerColor = Color.Black,
-            titleContentColor = Color.Yellow,
-            actionIconContentColor = Color.Yellow,
-            navigationIconContentColor = Color.Black,
-            scrolledContainerColor = Color.Black
+            containerColor = ColorBlack,
+            titleContentColor = ColorYellow,
+            actionIconContentColor = ColorYellow,
+            navigationIconContentColor = ColorBlack,
+            scrolledContainerColor = ColorBlack
         ),
         modifier = modifier,
         navigationIcon = {
