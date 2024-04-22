@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,11 +34,16 @@ import com.gasstation.ui.theme.ColorWhite
 @Composable
 fun GasStationItem(gasStations: GasStation, oilType: String) {
     Card(shape = RoundedCornerShape(4.dp),
+        colors = CardColors(
+            contentColor = ColorWhite,
+            containerColor = ColorBlack,
+            disabledContainerColor = ColorBlack,
+            disabledContentColor = ColorWhite
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(8.dp)
-            .background(ColorWhite),
+            .padding(8.dp),
         onClick = { }
     ) {
         Row(
@@ -49,31 +55,41 @@ fun GasStationItem(gasStations: GasStation, oilType: String) {
         ) {
             Image(
                 modifier = Modifier
-                    .size(45.dp),
+                    .size(50.dp)
+                    .padding(start = 8.dp),
                 painter = painterResource(id = GasStationType.getGasStationImg(gasStations.POLL_DIV_CD)),
                 contentDescription = "",
                 contentScale = ContentScale.Fit
             )
-            Column(modifier = Modifier.padding(start = 8.dp)) {
-                Row() {
+            Column(modifier = Modifier.padding(8.dp)) {
+                Row(
+                    modifier = Modifier.background(ColorWhite),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Card(
                         shape = RoundedCornerShape(4.dp),
-                        modifier = Modifier.background(ColorGray)
+                        colors = CardColors(
+                            contentColor = ColorWhite,
+                            containerColor = ColorGray,
+                            disabledContainerColor = ColorGray,
+                            disabledContentColor = ColorWhite
+                        ),
                     ) {
                         Text(
+                            modifier = Modifier.padding(3.dp),
                             text = oilType,
-                            style = typography.labelMedium,
+                            style = typography.labelSmall,
                             color = ColorBlack
                         )
                     }
                     Text(
                         modifier = Modifier.padding(start = 5.dp),
                         text = gasStations.OS_NM,
-                        style = typography.labelMedium,
+                        style = typography.labelSmall,
                         color = ColorGray
                     )
                 }
-                Row() {
+                Row(modifier = Modifier.fillMaxWidth()) {
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text(
                             text = gasStations.PRICE.toString().numberFormat(),
@@ -81,10 +97,16 @@ fun GasStationItem(gasStations: GasStation, oilType: String) {
                             color = ColorBlack
                         )
                         Text(
-                            text = stringResource(id = R.string.won)
+                            modifier = Modifier.padding(start = 1.dp),
+                            text = stringResource(id = R.string.won),
+                            style = typography.labelMedium,
+                            color = ColorBlack
                         )
                     }
-                    Row(verticalAlignment = Alignment.Bottom) {
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        modifier = Modifier.padding(start = 12.dp)
+                    ) {
                         Text(
                             modifier = Modifier.padding(start = 5.dp),
                             text = gasStations.DISTANCE.distanceFormat(),
@@ -92,7 +114,10 @@ fun GasStationItem(gasStations: GasStation, oilType: String) {
                             color = ColorBlack
                         )
                         Text(
-                            text = stringResource(id = R.string.km)
+                            modifier = Modifier.padding(start = 1.dp),
+                            text = stringResource(id = R.string.km),
+                            style = typography.labelMedium,
+                            color = ColorBlack
                         )
                     }
                 }
