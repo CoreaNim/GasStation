@@ -17,7 +17,6 @@ sealed class ResultWrapper<out T> {
 
     data object NetworkError : ResultWrapper<Nothing>()
 
-
     @Throws(Exception::class)
     fun takeValueOrThrow(): T {
         return when (this) {

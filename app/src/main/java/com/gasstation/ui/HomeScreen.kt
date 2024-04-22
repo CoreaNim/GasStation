@@ -5,24 +5,22 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.net.Uri
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,13 +35,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavHostController
 import com.gasstation.R
 import com.gasstation.common.ResultWrapper
@@ -52,6 +51,8 @@ import com.gasstation.domain.model.Coords
 import com.gasstation.domain.model.MapType
 import com.gasstation.ui.component.CurrentAddresssText
 import com.gasstation.ui.component.GasStationItem
+import com.gasstation.ui.component.PermissionButton
+import com.gasstation.ui.component.PermissionDialog
 import com.gasstation.ui.navigation.NavTarget
 import com.gasstation.ui.theme.ColorBlack
 import com.gasstation.ui.theme.ColorYellow
@@ -78,28 +79,36 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
     val permissionStates = rememberMultiplePermissionsState(
         permissions = getRequirePermissions()
     )
+    var isGPSEnabled by remember {
+        mutableStateOf(isGPSEnabled(context))
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(ColorYellow)
     ) {
-        HomeTopAppBar(
-            navController = navController,
+        HomeTopAppBar(navController = navController,
             sortType = homeViewModel.getSortType(),
             onChangeSortType = { homeViewModel.changeSortType() })
-        RequestPermission(scaffoldState)
-        if (permissionStates.allPermissionsGranted) {
+
+        val lifecycleEvent = rememberLifecycleEvent()
+        LaunchedEffect(lifecycleEvent) {
+            if (lifecycleEvent == Lifecycle.Event.ON_RESUME) {
+                isGPSEnabled = isGPSEnabled(context)
+            }
+        }
+
+        if (permissionStates.allPermissionsGranted && isGPSEnabled) {
+            RequestPermission(scaffoldState)
             val currentAddress by homeViewModel.currentAddress.collectAsState()
             if (currentAddress is ResultWrapper.Success) {
                 CurrentAddresssText(address = currentAddress.takeValueOrThrow())
             }
             when (val response = homeViewModel.gasStationsResult.collectAsState().value) {
                 is ResultWrapper.Success -> {
-                    val scrollState = rememberLazyListState()
                     val gasStations = response.value.OIL
                     LazyColumn(
-                        state = scrollState,
                         modifier = Modifier
                             .fillMaxSize()
                             .weight(1F),
@@ -112,8 +121,7 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
                                 if (isAppInstalled) {
                                     coroutine.launch {
                                         homeViewModel.landingMap(
-                                            item.GIS_X_COOR.toDouble(),
-                                            item.GIS_Y_COOR.toDouble()
+                                            item.GIS_X_COOR.toDouble(), item.GIS_Y_COOR.toDouble()
                                         ) { x, y ->
                                             val url = getMapUrl(x, y, mapType, item.OS_NM)
                                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -129,58 +137,63 @@ fun HomeScreen(scaffoldState: ScaffoldState, navController: NavHostController) {
                     }
                 }
 
-                else -> {
-
+                is ResultWrapper.Loading -> {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1F)
+                    ) {
+                        CircularProgressIndicator(
+                            color = ColorBlack,
+                            modifier = Modifier.padding(20.dp)
+                        )
+                    }
                 }
 
+                else -> {}
             }
-
         } else {
-            Card(shape = RoundedCornerShape(12.dp),
+            RequestPermission(scaffoldState)
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-                    .shadow(20.dp)
-                    .shadow(elevation = 10.dp),
-                onClick = { }
+                    .fillMaxSize()
+                    .weight(1F)
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = stringResource(id = R.string.auth_rationale_msg),
-                    modifier = Modifier.clickable {
-                        scope.launch {
-                            openRationaleDialog = true
-                        }
-                    })
+                val msg = if (!permissionStates.allPermissionsGranted) {
+                    stringResource(id = R.string.auth_rationale_msg)
+                } else {
+                    stringResource(id = R.string.location_setting_msg)
+                }
+                PermissionButton(msg = msg) {
+                    scope.launch {
+                        openRationaleDialog = true
+                    }
+                }
             }
         }
     }
 
     if (openRationaleDialog) {
-        AlertDialog(
-            modifier = Modifier.padding(horizontal = 12.dp),
-            onDismissRequest = { openRationaleDialog = false },
-            title = {
-                Text(text = stringResource(id = R.string.auth_rationale_msg))
-            },
-            text = {
-                Text(stringResource(id = R.string.auth_rationale_msg))
-            },
-            confirmButton = {
-                Button(onClick = {
-                    scope.launch {
-                        permissionStates.launchMultiplePermissionRequest()
-                        openRationaleDialog = false
-                    }
-                }) {
-                    Text(text = stringResource(id = R.string.ok))
+        val msg = if (!permissionStates.allPermissionsGranted) {
+            stringResource(id = R.string.auth_rationale_msg)
+        } else {
+            stringResource(id = R.string.location_setting_msg)
+        }
+        PermissionDialog(msg = msg, onConfirm = {
+            scope.launch {
+                if (!permissionStates.allPermissionsGranted) {
+                    permissionStates.launchMultiplePermissionRequest()
+                } else {
+                    context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
                 }
-            },
-            dismissButton = {
-                Button(onClick = { openRationaleDialog = false }) {
-                    Text(text = stringResource(id = R.string.cancel))
-                }
+                openRationaleDialog = false
             }
-        )
+        }, onDismiss = {
+            openRationaleDialog = false
+        })
     }
 }
 
@@ -192,33 +205,31 @@ fun RequestPermission(scaffoldState: ScaffoldState) {
     val fusedLocationProviderClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
     val scope = rememberCoroutineScope()
-    RequestLocationPermission(
-        onPermissionGranted = {
-            getCurrentLocation(
-                context = context,
-                fusedLocationProviderClient = fusedLocationProviderClient,
-                onGetCurrentLocationSuccess = {
-                    Timber.i("latitude = " + it.first + " , longitude = " + it.second)
-                    scope.launch {
-                        homeViewModel.getCurrentAddress(it.second, it.first, Coords.WGS84.name)
-                        homeViewModel.getGasStationList(
-                            it.second,
-                            it.first,
-                            Coords.WGS84.name,
-                            Coords.KTM.name
-                        )
-                    }
-                },
-                onGetCurrentLocationFailed = {
-                    popupSnackBar(scope, scaffoldState, "위치정보를 가지고 오지 못했습니다.")
-                    Timber.i(it.localizedMessage ?: "Error Getting Current Location")
+    RequestLocationPermission(onPermissionGranted = {
+        getCurrentLocation(context = context,
+            fusedLocationProviderClient = fusedLocationProviderClient,
+            onGetCurrentLocationSuccess = {
+                Timber.i("latitude = " + it.first + " , longitude = " + it.second)
+                scope.launch {
+                    homeViewModel.getCurrentAddress(it.second, it.first, Coords.WGS84.name)
+                    homeViewModel.getGasStationList(
+                        it.second, it.first, Coords.WGS84.name, Coords.KTM.name
+                    )
                 }
-            )
-        }, onPermissionDenied = {
-            popupSnackBar(scope, scaffoldState, "주유주유소를 이용하시려면 위치 권한을 허용해주세요.")
-        }, onPermissionsRevoked = {
-            popupSnackBar(scope, scaffoldState, "주유주유소를 이용하시려면 위치 권한을 허용해주세요.")
-        })
+            },
+            onGetCurrentLocationFailed = {
+                popupSnackBar(
+                    scope,
+                    scaffoldState,
+                    context.getString(R.string.fail_get_location_info)
+                )
+                Timber.i(it.localizedMessage ?: "Error Getting Current Location")
+            })
+    }, onPermissionDenied = {
+        popupSnackBar(scope, scaffoldState, context.getString(R.string.auth_denied_msg))
+    }, onPermissionsRevoked = {
+        popupSnackBar(scope, scaffoldState, context.getString(R.string.auth_denied_msg))
+    })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -229,30 +240,23 @@ fun HomeTopAppBar(
     modifier: Modifier = Modifier,
     onChangeSortType: () -> Unit
 ) {
-    TopAppBar(
-        title = {
-            Text(text = sortType, modifier = Modifier.clickable {
-                onChangeSortType()
-            })
-        },
-        colors = TopAppBarColors(
-            containerColor = ColorBlack,
-            titleContentColor = ColorYellow,
-            actionIconContentColor = ColorYellow,
-            navigationIconContentColor = ColorBlack,
-            scrolledContainerColor = ColorBlack
-        ),
-        modifier = modifier,
-        navigationIcon = {
-        },
-        actions = {
-            IconButton(onClick = {
-                navController.navigate(NavTarget.Setting.route)
-            }) {
-                Icon(Icons.Filled.Settings, "Setting")
-            }
+    TopAppBar(title = {
+        Text(text = sortType, modifier = Modifier.clickable {
+            onChangeSortType()
+        })
+    }, colors = TopAppBarColors(
+        containerColor = ColorBlack,
+        titleContentColor = ColorYellow,
+        actionIconContentColor = ColorYellow,
+        navigationIconContentColor = ColorBlack,
+        scrolledContainerColor = ColorBlack
+    ), modifier = modifier, navigationIcon = {}, actions = {
+        IconButton(onClick = {
+            navController.navigate(NavTarget.Setting.route)
+        }) {
+            Icon(Icons.Filled.Settings, "Setting")
         }
-    )
+    })
 }
 
 @SuppressLint("MissingPermission")
@@ -281,11 +285,10 @@ private fun getCurrentLocation(
 
 private fun areLocationPermissionsGranted(context: Context): Boolean {
     return (ActivityCompat.checkSelfPermission(
-        context, android.Manifest.permission.ACCESS_FINE_LOCATION
-    ) == PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(
-                context, android.Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED)
+        context, Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+        context, Manifest.permission.ACCESS_COARSE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED)
 }
 
 
@@ -313,7 +316,7 @@ fun RequestLocationPermission(
 
         if (permissionsToRequest.isNotEmpty()) permissionState.launchMultiplePermissionRequest()
 
-        Timber.i("onPermissionDenied = " + allPermissionsRevoked)
+        Timber.i("LaunchedEffect() allPermissionsRevoked = $allPermissionsRevoked")
         if (allPermissionsRevoked) {
             onPermissionsRevoked()
         } else {
@@ -328,8 +331,7 @@ fun RequestLocationPermission(
 
 fun getRequirePermissions(): List<String> {
     return listOf(
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION
+        Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION
     )
 }
 
@@ -346,8 +348,7 @@ private fun isAppInstalled(context: Context, mapType: MapType): Boolean {
 private fun landingMapMarket(context: Context, mapType: MapType) {
     context.startActivity(
         Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("market://details?id=${getPackageName(mapType)}")
+            Intent.ACTION_VIEW, Uri.parse("market://details?id=${getPackageName(mapType)}")
         )
     )
 }
@@ -382,4 +383,12 @@ private fun getMapUrl(x: String, y: String, mapType: MapType, name: String): Str
             "nmap://route/car?dlat=${y}&dlng=${x}&dname=${name}"
         }
     }
+}
+
+private fun isGPSEnabled(context: Context): Boolean {
+    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+    return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+        LocationManager.NETWORK_PROVIDER
+    )
 }

@@ -25,7 +25,7 @@ import androidx.navigation.NavHostController
 import com.gasstation.R
 import com.gasstation.ui.component.SettingItem
 import com.gasstation.ui.theme.ColorBlack
-import com.gasstation.ui.theme.ColorGray4
+import com.gasstation.ui.theme.ColorGrayLight
 import com.gasstation.ui.theme.ColorYellow
 
 
@@ -36,7 +36,7 @@ fun SettingScreen(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.background(ColorGray4)) {
+    Column(modifier = Modifier.background(ColorGrayLight)) {
         TopAppBar(
             title = { },
             colors = TopAppBarColors(
@@ -73,7 +73,7 @@ fun SettingScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1F)
-                .background(ColorGray4)
+                .background(ColorGrayLight)
         ) {
             items(menu) { setting ->
                 SettingItem(setting = setting) {

@@ -12,7 +12,6 @@ import com.gasstation.domain.repository.SharePrefsRepository
 import com.gasstation.extensions.resultCallbackFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -65,7 +64,6 @@ class HomeViewModel @Inject constructor(
                 if (this is ResultWrapper.Success) {
                     sortType.value = sharePrefsRepo.sortType
                     oilType.value = sharePrefsRepo.oilType
-                    Timber.i("list size = " + takeValueOrThrow().OIL.size)
                 }
             }
         }

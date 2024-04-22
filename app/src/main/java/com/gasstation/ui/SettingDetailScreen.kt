@@ -16,7 +16,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -30,7 +29,7 @@ import com.gasstation.domain.model.SortType
 import com.gasstation.ui.component.SettingDetailItem
 import com.gasstation.ui.theme.ColorBlack
 import com.gasstation.ui.theme.ColorGray
-import com.gasstation.ui.theme.ColorGray4
+import com.gasstation.ui.theme.ColorGrayLight
 import com.gasstation.ui.theme.ColorYellow
 import com.gasstation.viewmodel.HomeViewModel
 
@@ -104,7 +103,7 @@ fun SettingDetailScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1F)
-                .background(ColorGray4)
+                .background(ColorGrayLight)
         ) {
             items(details) { type ->
                 SettingDetailItem(type, currentSettingType == type) {

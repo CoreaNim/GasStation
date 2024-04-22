@@ -10,7 +10,6 @@ import com.gasstation.domain.model.GasStationType
 import com.gasstation.domain.model.OilType
 import com.gasstation.domain.model.RESULT
 import com.gasstation.domain.model.SortType
-import com.gasstation.domain.model.TransCoord
 import com.gasstation.extensions.safeApiCall
 import javax.inject.Inject
 

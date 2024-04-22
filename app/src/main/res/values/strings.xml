@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">주유주유소</string>
-    <string name="auth_rationale_msg">주유주유소를 이용하시려면 위치 권한을 허용해주세요.</string>
+    <string name="auth_rationale_msg">주유주유소를 이용하시려면\n위치 권한을 허용해주세요.</string>
     <string name="auth_denied_msg">현재위치 주변 주유소 검색을 위해 위치 권한이 필수로 필요합니다.</string>
-    <string name="location_setting_message">주유소 검색을 위해 위치 서비스를 켜야 합니다.</string>
+    <string name="location_setting_msg">주유소 검색을 위해 위치 서비스를 켜야 합니다.</string>
+    <string name="fail_get_location_info">위치정보를 가지고 오지 못했습니다.</string>
 
     <string name="sort_distance">거리순 보기</string>
     <string name="sort_price">가격순 보기</string>
